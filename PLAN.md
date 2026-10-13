@@ -46,8 +46,14 @@
   curl 확인: 정상 4건(최소 입력, 전체 필드, <b> 글자, 100자 제목) 201 / 422 11건(빈·공백·101자 제목, title 없음, 설명 2001자, 잘못된 status·priority,
   없는 날짜, 날짜 형식, 날짜 숫자, id 전달, 잘못된 JSON) / GET은 200에 4건만 반환(422 요청은 저장되지 않음), 기본값 description ""·TODO·NORMAL·null 확인.
   /docs 확인(사용자): POST {"title":"테스트"} 201, GET으로 조회, POST {"title":""} 422, 성공. 남은 오류 없음.
-- [ ] T07: PATCH·DELETE와 필터 구현.
+- [x] T07: PATCH·DELETE와 필터 구현.
   확인: 미전달 필드 유지, 없는 ID 404, 삭제 204.
+  기록: 변경 파일 backend/main.py, API-SPEC.md. PATCH·DELETE /api/tasks/{id}, GET /api/tasks의 q·status·priority 필터(AND) 구현.
+  실행 명령: .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000, curl로 확인 후 서버 종료.
+  curl 확인: PATCH 상태만·제목만(공백 제거)·due_date null 해제·빈 본문 모두 200이고 미전달 필드와 다른 항목 유지, 없는 id는 PATCH·DELETE 모두 404,
+  PATCH 422 8건(빈·101자 제목, 설명 2001자, 잘못된 status, 없는 날짜, title·status null, id 전달)과 숫자 아닌 id 422, 실패 후 데이터 그대로,
+  필터 q(대소문자·공백 무시)·status·priority 단독과 AND 조합 정확, 결과 없으면 200 [], 잘못된 필터 값 422, DELETE 204 후 재삭제 404, 삭제된 id는 재사용되지 않음.
+  /docs 확인(사용자): PATCH 200과 해당 항목만 변경, 없는 id 404, 필터, DELETE 204 확인, 이상 없음. 남은 오류 없음.
 - [ ] T08: 프런트엔드 저장 처리를 API 호출로 교체.
   확인: 화면과 curl 목록이 같음. API 중지 시 오류 표시.
 ## 4장: DB
