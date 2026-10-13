@@ -79,8 +79,17 @@
   확인: 1차 실행 '새로 만듦', SHOW TABLES·SHOW CREATE TABLE로 구조 확인, 2차 실행 '이미 있음(변경 없음)'이고 삽입해 둔 행 유지, 한글·<b> 태그·특수문자 왕복 정상,
   제약: 잘못된 status·priority, NULL 제목, 101자 제목, 존재하지 않는 날짜, 2001자 설명은 DB가 거절. 오류 처리: 잘못된 비밀번호·포트·설정 누락 시 비밀번호 노출 없이 한 줄 메시지와 종료 코드 1.
   처음 만든 테이블에 created_at 기본값이 없어(SQL 직접 삽입 불가) 비어 있는 상태에서 ALTER TABLE로 기본값만 추가하고 models.py와 맞춤. 테스트로 넣은 행은 모두 삭제해 tasks는 비어 있음. 남은 오류 없음.
-- [ ] T11: API 메모리 저장을 DB로 교체.
+- [x] T11: API 메모리 저장을 DB로 교체.
   확인: 등록한 행을 SQL로 조회. API 재시작 후 데이터 유지.
+  기록: 변경 파일 backend/main.py, API-SPEC.md. 메모리 저장(리스트·잠금·카운터)을 SQLAlchemy 세션으로 교체. 요청·응답 형식은 그대로라 프런트엔드는 변경 없음.
+  구현: 요청마다 세션 사용, POST·PATCH 후 DB에서 다시 읽어 응답, 변경은 id로 처리, 데이터베이스 오류는 503(원인은 서버 로그에만, 비밀번호 노출 없음), /api/health는 DB와 무관하게 200.
+  q 검색은 대소문자만 무시하고 악센트는 구분, %·_는 글자 그대로 찾도록 처리(기존 메모리 버전과 같은 규칙).
+  실행 명령: .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000, curl로 확인 후 서버 종료.
+  curl 확인: POST 201, GET 목록, PATCH(상태만·제목만 공백 제거·우선순위만·due_date null)는 지정한 항목만 변경하고 미전달 필드 유지, 빈 본문 200,
+  없는 id는 PATCH·DELETE 404, 422(PATCH·POST·필터)는 저장·변경 없음, 필터 q·status·priority 단독과 AND, '%'·'_'·대소문자·악센트 구분, DELETE 204 후 재삭제 404, 삭제된 id는 재사용 없음, <b> 등 HTML 문자 그대로 저장.
+  SQL 확인: mariadb로 task_flow_app 접속해 SELECT한 행이 API 목록과 일치. 재시작 확인: 서버를 껐다 켠 뒤 GET이 같은 5건을 반환하고 SQL 조회도 같음.
+  DB 접속 불가(포트 오류)일 때 GET·POST 503, health 200, 로그에 비밀번호 없음. 테스트로 넣은 행은 모두 삭제하고 AUTO_INCREMENT를 1로 되돌려 tasks를 비움(T11 시작 전 0행이었음).
+  사용자 확인: 화면에서 등록·변경 후 SQL(sudo mariadb)로 조회한 행이 화면과 일치, API 재시작 후에도 데이터 유지, 이상 없음. 남은 오류 없음.
 ## 5장: 서버 분리
 - [ ] T12: DB 서버 구성 후 App 서버에서 SELECT 1 확인.
 - [ ] T13: App 서버 코드·가상환경·환경변수·systemd 구성.
