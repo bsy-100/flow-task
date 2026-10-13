@@ -57,3 +57,30 @@ button {
 #empty-message {
   color: #888;
 }
+
+#task-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+#task-list .title {
+  flex: 1;
+}
+
+#task-list li.done .title {
+  text-decoration: line-through;
+  color: #888;
+}
+
+#task-list .actions {
+  display: flex;
+  gap: 4px;
+}
+
+#task-list .actions select,
+#task-list .actions button {
+  font-size: 14px;
+  padding: 4px 8px;
+}
