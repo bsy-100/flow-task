@@ -27,14 +27,15 @@ PRD.md의 요구사항을 기준으로 한다. 요청·응답 본문은 JSON이�
 서버 동작 확인용.
 - 응답 `200`: `{"status": "ok"}`
 
-### GET /api/tasks — 예정 (T06, 필터는 T07)
-- 응답 `200`: Task 배열
+### GET /api/tasks — 구현됨 (T06, 필터는 T07 예정)
+- 응답 `200`: Task 배열(등록 순서). 저장소는 T06 단계에서 메모리이며 API를 재시작하면 비워진다.
 - 쿼리(T07, 모두 선택, 함께 주면 AND): `q`(제목 검색), `status`, `priority`
 
-### POST /api/tasks — 예정 (T06)
-- 요청: `title`(필수), `description`, `status`, `priority`, `due_date`(선택)
+### POST /api/tasks — 구현됨 (T06)
+- 요청: `title`(필수), `description`, `status`, `priority`, `due_date`(선택). `id`, `created_at` 등 명세에 없는 필드는 허용하지 않는다.
+- `title`, `description`은 앞뒤 공백을 제거한 값으로 검증·저장한다.
 - 응답 `201`: 생성된 Task
-- 입력 위반: `422`
+- 입력 위반(빈·공백 제목, 101자 제목, 2001자 설명, 잘못된 status·priority, 없는 날짜·형식 오류, 알 수 없는 필드, 잘못된 JSON): `422`. 저장하지 않는다.
 
 ### PATCH /api/tasks/{id} — 예정 (T07)
 - 요청: 바꿀 필드만 전달한다. 전달하지 않은 필드는 유지한다.

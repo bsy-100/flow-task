@@ -39,8 +39,13 @@
   실행 명령: python3 -m venv .venv, .venv/bin/python -m pip install fastapi uvicorn, .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000.
   확인: curl http://127.0.0.1:8000/api/health → HTTP 200, {"status":"ok"}. 없는 경로는 404, /docs 200. 확인 후 서버 종료.
   사용자 확인: 직접 curl로 확인, 이상 없음. 남은 오류 없음.
-- [ ] T06: 메모리 기반 /api/tasks GET과 POST.
+- [x] T06: 메모리 기반 /api/tasks GET과 POST.
   확인: /docs에서 등록 후 조회. 입력 위반은 422.
+  기록: 변경 파일 backend/main.py, API-SPEC.md. GET·POST /api/tasks 메모리 저장(필터·PATCH·DELETE는 T07). id·created_at은 서버가 부여, POST는 201.
+  실행 명령: .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000, curl로 확인 후 서버 종료.
+  curl 확인: 정상 4건(최소 입력, 전체 필드, <b> 글자, 100자 제목) 201 / 422 11건(빈·공백·101자 제목, title 없음, 설명 2001자, 잘못된 status·priority,
+  없는 날짜, 날짜 형식, 날짜 숫자, id 전달, 잘못된 JSON) / GET은 200에 4건만 반환(422 요청은 저장되지 않음), 기본값 description ""·TODO·NORMAL·null 확인.
+  /docs 확인(사용자): POST {"title":"테스트"} 201, GET으로 조회, POST {"title":""} 422, 성공. 남은 오류 없음.
 - [ ] T07: PATCH·DELETE와 필터 구현.
   확인: 미전달 필드 유지, 없는 ID 404, 삭제 204.
 - [ ] T08: 프런트엔드 저장 처리를 API 호출로 교체.
