@@ -71,8 +71,14 @@
   MariaDB 11.8.6이 이미 설치·실행 중(127.0.0.1:3306)이라 설치는 하지 않음. 실행 명령: bash db/create_db.sh(사용자가 sudo로 직접 실행).
   접속 확인: .env 값으로 TCP 127.0.0.1 접속해 SELECT 1 성공, 사용자 task_flow_app@localhost, DB task_flow, 문자 집합 utf8mb4.
   권한 확인: task_flow DB에만 ALL PRIVILEGES, mysql DB 접근은 거부(1044), 현재 테이블 없음(T10에서 생성). 남은 오류 없음.
-- [ ] T10: backend/database.py, models.py, init_db.py 생성.
+- [x] T10: backend/database.py, models.py, init_db.py 생성.
   확인: python -m backend.init_db 실행 후 tasks 테이블 확인.
+  기록: 변경 파일 backend/database.py, models.py, init_db.py(추가), requirements.txt. 새 패키지(가상환경에만 설치): sqlalchemy==2.1.4(테이블 정의·DB 접근), pymysql==1.2.3(MariaDB 드라이버), python-dotenv==1.2.4(.env 읽기).
+  실행 명령: .venv/bin/python -m backend.init_db (없는 테이블만 만들고 기존 테이블·데이터는 변경하지 않음). API(backend/main.py)는 아직 메모리를 사용하며 DB 교체는 T11.
+  tasks 테이블: id(자동 증가 기본키), title VARCHAR(100), description VARCHAR(2000) 기본 '', status ENUM(TODO,DOING,DONE) 기본 TODO, priority ENUM(HIGH,NORMAL,LOW) 기본 NORMAL, due_date DATE(NULL 허용), created_at DATETIME 기본 UTC 현재 시각. utf8mb4.
+  확인: 1차 실행 '새로 만듦', SHOW TABLES·SHOW CREATE TABLE로 구조 확인, 2차 실행 '이미 있음(변경 없음)'이고 삽입해 둔 행 유지, 한글·<b> 태그·특수문자 왕복 정상,
+  제약: 잘못된 status·priority, NULL 제목, 101자 제목, 존재하지 않는 날짜, 2001자 설명은 DB가 거절. 오류 처리: 잘못된 비밀번호·포트·설정 누락 시 비밀번호 노출 없이 한 줄 메시지와 종료 코드 1.
+  처음 만든 테이블에 created_at 기본값이 없어(SQL 직접 삽입 불가) 비어 있는 상태에서 ALTER TABLE로 기본값만 추가하고 models.py와 맞춤. 테스트로 넣은 행은 모두 삭제해 tasks는 비어 있음. 남은 오류 없음.
 - [ ] T11: API 메모리 저장을 DB로 교체.
   확인: 등록한 행을 SQL로 조회. API 재시작 후 데이터 유지.
 ## 5장: 서버 분리
