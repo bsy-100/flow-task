@@ -33,8 +33,12 @@
   우선순위 필터 중 화면 2번째 항목(전체 3번째)의 수정·삭제·상태 변경이 정확한 항목에만 적용, 삭제 취소 시 유지, 필터 중 등록·지연 표시 정상.
   2단계 브라우저(127.0.0.1:5500) 확인: 검색·필터 AND, 필터 중 수정·상태 변경·삭제 취소·삭제 확인, 지연 표시, 이상 없음. 남은 오류 없음.
 ## 3장: API
-- [ ] T05: API-SPEC.md 작성, FastAPI /api/health 구현.
+- [x] T05: API-SPEC.md 작성, FastAPI /api/health 구현.
   확인: curl로 200과 status=ok.
+  기록: 변경 파일 API-SPEC.md, backend/__init__.py, backend/main.py, requirements.txt(fastapi==0.143.0, uvicorn==0.54.0), .gitignore(.venv/, __pycache__/, .env).
+  실행 명령: python3 -m venv .venv, .venv/bin/python -m pip install fastapi uvicorn, .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000.
+  확인: curl http://127.0.0.1:8000/api/health → HTTP 200, {"status":"ok"}. 없는 경로는 404, /docs 200. 확인 후 서버 종료.
+  사용자 확인: 직접 curl로 확인, 이상 없음. 남은 오류 없음.
 - [ ] T06: 메모리 기반 /api/tasks GET과 POST.
   확인: /docs에서 등록 후 조회. 입력 위반은 422.
 - [ ] T07: PATCH·DELETE와 필터 구현.
