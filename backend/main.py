@@ -5,12 +5,22 @@ from enum import Enum
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 MAX_TITLE_LENGTH = 100
 MAX_DESCRIPTION_LENGTH = 2000
 
 app = FastAPI(title="Task Flow API")
+
+# 개발 단계에서는 화면(5500번 포트)과 API(8000번 포트)의 출처가 달라 브라우저가 요청을 막는다.
+# 화면 출처만 허용한다. 최종 배포에서는 Nginx가 같은 출처로 /api를 전달하므로 영향이 없다.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Content-Type"],
+)
 
 
 class Status(str, Enum):
