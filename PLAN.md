@@ -100,6 +100,7 @@
 T01~T04: python3 -m http.server 5500 --bind 127.0.0.1 --directory frontend
 T05~T11: 가상환경에서 python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 실제 존재하는 파일을 확인한 뒤 명령을 실행한다.
+개발 확인용(선택): SERVE_FRONTEND=1을 붙여 API 서버를 실행하면 같은 주소(8000번)에서 frontend/도 함께 서비스한다. ngrok 같은 터널 하나로 화면과 API를 열 때 쓰며, 최종 배포(T13~T14)에서는 켜지 않는다.
 ## 기록
 각 작업에 변경 파일, 실행 명령, 실제 확인 결과, 남은 오류를 기록한다.
 정상 동작을 확인한 작업 단위로 Git 커밋한다.

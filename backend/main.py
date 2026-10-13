@@ -1,12 +1,15 @@
 import logging
+import os
 import re
 from datetime import date, timezone
 from enum import Enum
+from pathlib import Path
 from typing import Iterator, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -238,3 +241,11 @@ def delete_task(task_id: int, session: Session = Depends(get_session)):
     session.delete(row)
     session.commit()
     return Response(status_code=204)
+
+
+# 개발 확인용: SERVE_FRONTEND=1일 때만 frontend/ 폴더를 같은 주소("/")에서 함께 서비스한다.
+# 화면과 API가 한 주소가 되므로 ngrok 같은 터널 하나로 전체 앱을 열 수 있다.
+# 최종 배포(Nginx가 화면 담당)에서는 켜지 않는다. 반드시 모든 API 경로 정의 뒤에 둔다.
+if os.environ.get("SERVE_FRONTEND") == "1":
+    FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
