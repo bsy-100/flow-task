@@ -66,7 +66,11 @@
   API 중지 시: 등록·상태 변경·새로 열기 모두 '서버에 연결할 수 없습니다...' 표시, 입력값 유지, 상태 선택 원복, 빈 목록 대신 '목록을 불러오지 못했습니다.' 표시.
   브라우저(127.0.0.1:5500) 확인(사용자): 등록·상태 변경·수정·삭제, 화면과 curl 목록 일치, 새로고침 후 유지, API 중지 시 오류 표시, 이상 없음. 남은 오류 없음.
 ## 4장: DB
-- [ ] T09: MariaDB 전용 사용자·DB와 .env 준비. 접속 확인.
+- [x] T09: MariaDB 전용 사용자·DB와 .env 준비. 접속 확인.
+  기록: 변경 파일 .env.example, db/create_db.sh(추가). .env는 Git에서 제외(.gitignore)되고 권한 600이며 비밀번호는 무작위 32자로 생성해 출력하지 않음.
+  MariaDB 11.8.6이 이미 설치·실행 중(127.0.0.1:3306)이라 설치는 하지 않음. 실행 명령: bash db/create_db.sh(사용자가 sudo로 직접 실행).
+  접속 확인: .env 값으로 TCP 127.0.0.1 접속해 SELECT 1 성공, 사용자 task_flow_app@localhost, DB task_flow, 문자 집합 utf8mb4.
+  권한 확인: task_flow DB에만 ALL PRIVILEGES, mysql DB 접근은 거부(1044), 현재 테이블 없음(T10에서 생성). 남은 오류 없음.
 - [ ] T10: backend/database.py, models.py, init_db.py 생성.
   확인: python -m backend.init_db 실행 후 tasks 테이블 확인.
 - [ ] T11: API 메모리 저장을 DB로 교체.
