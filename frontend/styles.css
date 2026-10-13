@@ -1,0 +1,59 @@
+body {
+  font-family: sans-serif;
+  background: #f5f6f8;
+  color: #222;
+  margin: 0;
+}
+
+main {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#error-message {
+  color: #c0392b;
+  min-height: 1.2em;
+  margin: 6px 0 0;
+}
+
+#task-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+#task-list li {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+#empty-message {
+  color: #888;
+}

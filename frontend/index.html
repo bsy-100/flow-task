@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Flow</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <h1>Task Flow</h1>
+    <form id="task-form" novalidate>
+      <label for="title-input">할 일 제목</label>
+      <div class="row">
+        <input id="title-input" type="text" autocomplete="off" placeholder="할 일을 입력하세요">
+        <button type="submit">등록</button>
+      </div>
+      <p id="error-message" role="alert"></p>
+    </form>
+    <ul id="task-list"></ul>
+    <p id="empty-message">등록된 할 일이 없습니다.</p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
