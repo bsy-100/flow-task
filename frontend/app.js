@@ -19,6 +19,9 @@ const input = document.getElementById("title-input");
 const descriptionInput = document.getElementById("description-input");
 const priorityInput = document.getElementById("priority-input");
 const dueDateInput = document.getElementById("due-date-input");
+const searchInput = document.getElementById("search-input");
+const statusFilter = document.getElementById("status-filter");
+const priorityFilter = document.getElementById("priority-filter");
 const errorMessage = document.getElementById("error-message");
 const taskList = document.getElementById("task-list");
 const emptyMessage = document.getElementById("empty-message");
@@ -257,9 +260,24 @@ function priorityLabel(priority) {
   return PRIORITIES.find((p) => p.value === priority).label;
 }
 
+// 제목 검색, 상태 필터, 우선순위 필터를 모두 만족하는 항목만 남긴다(AND).
+// 필터 값은 화면 상태일 뿐이며 저장하지 않는다. 항목 조작은 항상 id로 처리한다.
+function getVisibleTasks() {
+  const query = searchInput.value.trim().toLowerCase();
+  const status = statusFilter.value;
+  const priority = priorityFilter.value;
+  return tasks.filter(
+    (t) =>
+      (query === "" || t.title.toLowerCase().includes(query)) &&
+      (status === "" || t.status === status) &&
+      (priority === "" || t.priority === priority)
+  );
+}
+
 function render() {
   taskList.replaceChildren();
-  for (const task of tasks) {
+  const visibleTasks = getVisibleTasks();
+  for (const task of visibleTasks) {
     const li = document.createElement("li");
     li.dataset.id = String(task.id);
     if (task.status === "DONE") {
@@ -306,8 +324,14 @@ function render() {
     li.appendChild(actions);
     taskList.appendChild(li);
   }
-  emptyMessage.hidden = tasks.length > 0;
+  emptyMessage.textContent =
+    tasks.length === 0 ? "등록된 할 일이 없습니다." : "조건에 맞는 할 일이 없습니다.";
+  emptyMessage.hidden = visibleTasks.length > 0;
 }
+
+searchInput.addEventListener("input", render);
+statusFilter.addEventListener("change", render);
+priorityFilter.addEventListener("change", render);
 
 form.addEventListener("submit", function (event) {
   event.preventDefault();

@@ -146,3 +146,20 @@ form label {
   padding: 6px;
   font-size: 14px;
 }
+
+#filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+#filters input {
+  flex: 1;
+  min-width: 140px;
+}
+
+#filters select {
+  padding: 6px;
+  font-size: 14px;
+}

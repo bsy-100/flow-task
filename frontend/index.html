@@ -33,6 +33,21 @@
       </div>
       <p id="error-message" role="alert"></p>
     </form>
+    <section id="filters" aria-label="검색과 필터">
+      <input id="search-input" type="search" autocomplete="off" placeholder="제목 검색">
+      <select id="status-filter" aria-label="상태 필터">
+        <option value="">상태 전체</option>
+        <option value="TODO">할 일</option>
+        <option value="DOING">진행 중</option>
+        <option value="DONE">완료</option>
+      </select>
+      <select id="priority-filter" aria-label="우선순위 필터">
+        <option value="">우선순위 전체</option>
+        <option value="HIGH">높음</option>
+        <option value="NORMAL">보통</option>
+        <option value="LOW">낮음</option>
+      </select>
+    </section>
     <ul id="task-list"></ul>
     <p id="empty-message">등록된 할 일이 없습니다.</p>
   </main>
