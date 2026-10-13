@@ -15,6 +15,22 @@
         <input id="title-input" type="text" autocomplete="off" placeholder="할 일을 입력하세요">
         <button type="submit">등록</button>
       </div>
+      <label for="description-input">설명 (선택, 2000자 이하)</label>
+      <textarea id="description-input" rows="2"></textarea>
+      <div class="row options">
+        <div>
+          <label for="priority-input">우선순위</label>
+          <select id="priority-input">
+            <option value="HIGH">높음</option>
+            <option value="NORMAL" selected>보통</option>
+            <option value="LOW">낮음</option>
+          </select>
+        </div>
+        <div>
+          <label for="due-date-input">마감일 (선택)</label>
+          <input id="due-date-input" type="date">
+        </div>
+      </div>
       <p id="error-message" role="alert"></p>
     </form>
     <ul id="task-list"></ul>

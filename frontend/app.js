@@ -1,14 +1,24 @@
 const MAX_TITLE_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 2000;
 const STORAGE_KEY = "task-flow-v1";
 const STATUSES = [
   { value: "TODO", label: "할 일" },
   { value: "DOING", label: "진행 중" },
   { value: "DONE", label: "완료" },
 ];
+const PRIORITIES = [
+  { value: "HIGH", label: "높음" },
+  { value: "NORMAL", label: "보통" },
+  { value: "LOW", label: "낮음" },
+];
 const DEFAULT_STATUS = "TODO";
+const DEFAULT_PRIORITY = "NORMAL";
 
 const form = document.getElementById("task-form");
 const input = document.getElementById("title-input");
+const descriptionInput = document.getElementById("description-input");
+const priorityInput = document.getElementById("priority-input");
+const dueDateInput = document.getElementById("due-date-input");
 const errorMessage = document.getElementById("error-message");
 const taskList = document.getElementById("task-list");
 const emptyMessage = document.getElementById("empty-message");
@@ -21,6 +31,33 @@ function isValidStatus(status) {
   return STATUSES.some((s) => s.value === status);
 }
 
+function isValidPriority(priority) {
+  return PRIORITIES.some((p) => p.value === priority);
+}
+
+// YYYY-MM-DD 형식이면서 실제로 존재하는 날짜인지 확인한다.
+function isValidDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+  const [y, m, d] = value.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
+// 로컬 달력 기준 오늘 날짜(YYYY-MM-DD)
+function todayLocal() {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return now.getFullYear() + "-" + mm + "-" + dd;
+}
+
+function isOverdue(task) {
+  return task.due_date !== null && task.status !== "DONE" && task.due_date < todayLocal();
+}
+
+// 이전 단계(T02·T03)에서 저장된 항목에는 없는 필드가 있을 수 있어 선택값으로 허용한다.
 function isValidTask(task) {
   return (
     task !== null &&
@@ -28,7 +65,12 @@ function isValidTask(task) {
     Number.isInteger(task.id) &&
     task.id > 0 &&
     typeof task.title === "string" &&
-    (task.status === undefined || isValidStatus(task.status))
+    (task.status === undefined || isValidStatus(task.status)) &&
+    (task.description === undefined ||
+      (typeof task.description === "string" && task.description.length <= MAX_DESCRIPTION_LENGTH)) &&
+    (task.priority === undefined || isValidPriority(task.priority)) &&
+    (task.due_date === undefined || task.due_date === null || isValidDate(task.due_date)) &&
+    (task.created_at === undefined || task.created_at === null || typeof task.created_at === "string")
   );
 }
 
@@ -51,12 +93,16 @@ function loadTasks() {
   if (!Array.isArray(parsed) || !parsed.every(isValidTask)) {
     return { error: "저장된 데이터 형식이 올바르지 않습니다. 기존 값은 그대로 두었습니다." };
   }
-  // T02에서 저장된 항목에는 status가 없으므로 기본값을 채운다.
+  // 없는 필드는 기본값으로 채워 화면에서만 사용한다. 저장값은 바꾸지 않는다.
   return {
     tasks: parsed.map((task) => ({
       id: task.id,
       title: task.title,
+      description: task.description || "",
       status: task.status || DEFAULT_STATUS,
+      priority: task.priority || DEFAULT_PRIORITY,
+      due_date: task.due_date || null,
+      created_at: task.created_at || null,
     })),
   };
 }
@@ -93,6 +139,24 @@ function validateTitle(rawTitle) {
   return { title: title };
 }
 
+function validateDescription(rawDescription) {
+  const description = rawDescription.trim();
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    return { error: "설명은 " + MAX_DESCRIPTION_LENGTH + "자 이하로 입력해 주세요." };
+  }
+  return { description: description };
+}
+
+function validateDueDate(rawDueDate) {
+  if (rawDueDate === "") {
+    return { due_date: null };
+  }
+  if (!isValidDate(rawDueDate)) {
+    return { error: "마감일은 YYYY-MM-DD 형식의 올바른 날짜여야 합니다." };
+  }
+  return { due_date: rawDueDate };
+}
+
 function changeStatus(id, status) {
   if (storageError) {
     errorMessage.textContent = storageError;
@@ -108,7 +172,8 @@ function changeStatus(id, status) {
   }
 }
 
-function editTitle(id) {
+// 제목과 설명을 차례로 수정한다. 어느 단계에서든 취소하면 아무것도 바꾸지 않는다.
+function editTask(id) {
   if (storageError) {
     errorMessage.textContent = storageError;
     return;
@@ -117,16 +182,29 @@ function editTitle(id) {
   if (!target) {
     return;
   }
-  const answer = window.prompt("제목을 수정하세요.", target.title);
-  if (answer === null) {
+  const titleAnswer = window.prompt("제목을 수정하세요.", target.title);
+  if (titleAnswer === null) {
     return;
   }
-  const result = validateTitle(answer);
-  if (result.error) {
-    errorMessage.textContent = result.error;
+  const titleResult = validateTitle(titleAnswer);
+  if (titleResult.error) {
+    errorMessage.textContent = titleResult.error;
     return;
   }
-  commit(tasks.map((t) => (t.id === id ? { ...t, title: result.title } : t)));
+  const descriptionAnswer = window.prompt("설명을 수정하세요. (비워도 됩니다)", target.description);
+  if (descriptionAnswer === null) {
+    return;
+  }
+  const descriptionResult = validateDescription(descriptionAnswer);
+  if (descriptionResult.error) {
+    errorMessage.textContent = descriptionResult.error;
+    return;
+  }
+  commit(
+    tasks.map((t) =>
+      t.id === id ? { ...t, title: titleResult.title, description: descriptionResult.description } : t
+    )
+  );
 }
 
 function deleteTask(id) {
@@ -168,6 +246,17 @@ function createButton(label, onClick) {
   return button;
 }
 
+function createBadge(text, className) {
+  const badge = document.createElement("span");
+  badge.className = "badge " + className;
+  badge.textContent = text;
+  return badge;
+}
+
+function priorityLabel(priority) {
+  return PRIORITIES.find((p) => p.value === priority).label;
+}
+
 function render() {
   taskList.replaceChildren();
   for (const task of tasks) {
@@ -176,18 +265,44 @@ function render() {
     if (task.status === "DONE") {
       li.classList.add("done");
     }
+    const overdue = isOverdue(task);
+    if (overdue) {
+      li.classList.add("overdue");
+    }
+
+    const body = document.createElement("div");
+    body.className = "body";
 
     const title = document.createElement("span");
     title.className = "title";
     title.textContent = task.title;
+    body.appendChild(title);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.appendChild(createBadge("우선순위 " + priorityLabel(task.priority), "priority-" + task.priority));
+    if (task.due_date !== null) {
+      meta.appendChild(createBadge("마감 " + task.due_date, "due"));
+    }
+    if (overdue) {
+      meta.appendChild(createBadge("지연", "overdue-badge"));
+    }
+    body.appendChild(meta);
+
+    if (task.description !== "") {
+      const description = document.createElement("p");
+      description.className = "description";
+      description.textContent = task.description;
+      body.appendChild(description);
+    }
 
     const actions = document.createElement("span");
     actions.className = "actions";
     actions.appendChild(createStatusSelect(task));
-    actions.appendChild(createButton("수정", () => editTitle(task.id)));
+    actions.appendChild(createButton("수정", () => editTask(task.id)));
     actions.appendChild(createButton("삭제", () => deleteTask(task.id)));
 
-    li.appendChild(title);
+    li.appendChild(body);
     li.appendChild(actions);
     taskList.appendChild(li);
   }
@@ -200,17 +315,42 @@ form.addEventListener("submit", function (event) {
     errorMessage.textContent = storageError;
     return;
   }
-  const result = validateTitle(input.value);
-  if (result.error) {
-    errorMessage.textContent = result.error;
+  const titleResult = validateTitle(input.value);
+  if (titleResult.error) {
+    errorMessage.textContent = titleResult.error;
     return;
   }
-  const newTask = { id: nextId, title: result.title, status: DEFAULT_STATUS };
+  const descriptionResult = validateDescription(descriptionInput.value);
+  if (descriptionResult.error) {
+    errorMessage.textContent = descriptionResult.error;
+    return;
+  }
+  if (!isValidPriority(priorityInput.value)) {
+    errorMessage.textContent = "우선순위를 올바르게 선택해 주세요.";
+    return;
+  }
+  const dueDateResult = validateDueDate(dueDateInput.value);
+  if (dueDateResult.error) {
+    errorMessage.textContent = dueDateResult.error;
+    return;
+  }
+  const newTask = {
+    id: nextId,
+    title: titleResult.title,
+    description: descriptionResult.description,
+    status: DEFAULT_STATUS,
+    priority: priorityInput.value,
+    due_date: dueDateResult.due_date,
+    created_at: new Date().toISOString(),
+  };
   if (!commit(tasks.concat(newTask))) {
     return;
   }
   nextId += 1;
   input.value = "";
+  descriptionInput.value = "";
+  priorityInput.value = DEFAULT_PRIORITY;
+  dueDateInput.value = "";
   input.focus();
 });
 

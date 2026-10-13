@@ -65,8 +65,47 @@ button {
   gap: 8px;
 }
 
-#task-list .title {
+#task-list .body {
   flex: 1;
+  min-width: 0;
+}
+
+#task-list .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+#task-list .description {
+  margin: 6px 0 0;
+  color: #555;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #eceff3;
+}
+
+.badge.priority-HIGH {
+  background: #fde2df;
+}
+
+.badge.priority-LOW {
+  background: #e3f1e6;
+}
+
+.badge.overdue-badge {
+  background: #c0392b;
+  color: #fff;
+}
+
+#task-list li.overdue {
+  border-color: #c0392b;
 }
 
 #task-list li.done .title {
@@ -83,4 +122,27 @@ button {
 #task-list .actions button {
   font-size: 14px;
   padding: 4px 8px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+form label {
+  margin-top: 8px;
+}
+
+.options {
+  align-items: flex-end;
+}
+
+.options select,
+.options input {
+  padding: 6px;
+  font-size: 14px;
 }
